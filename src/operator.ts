@@ -366,6 +366,18 @@ export abstract class Operator {
       const value = where[key];
       if (Array.isArray(value)) {
         wheres.push('?? IN (?)');
+      } else if (typeof value === 'object' && !Array.isArray(value)) {
+        Object.keys(value).forEach(o => {
+          o = o.toLowerCase();
+          ((o === 'like') && wheres.push('?? LIKE ?')) ||
+          ((o === 'gte' || o === '>=') && wheres.push('?? >= ?')) ||
+          ((o === 'gt' || o === '>') && wheres.push('?? > ?')) ||
+          ((o === 'lte' || o === '<=') && wheres.push('?? <= ?')) ||
+          ((o === 'lt' || o === '<') && wheres.push('?? < ?')) || 
+          ((o === 'sql') && wheres.push('??  ?'));
+  
+          values.push(key, value[o] || value);
+        });
       } else {
         if (value === null || value === undefined) {
           wheres.push('?? IS ?');
